@@ -22,5 +22,19 @@ namespace ParsingProblem.Tests
             Assert.Throws<FormatException>(() => Parser.Parse(input1));
             Assert.Throws<FormatException>(() => Parser.Parse(input2));
         }
+        
+        [Fact]
+        public void DigitShouldReturnSelf()
+        {
+            var input1 = "1";
+            var input2 = "  12 ";
+
+            var expectedResult1 = "( 1 )";
+            var expectedResult2 = "( 12 )";
+            
+            var result1 = Parser.Parse(input1);
+
+            Assert.Equal(expectedResult1, result1);
+        }
     }
 }

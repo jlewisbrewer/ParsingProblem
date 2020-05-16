@@ -16,7 +16,11 @@ public class Parser
     }
     public static string Parse(string input)
     {
-        // First check if input has the correct chars
+        // Make sure the string isn't empty
+        if(!input.Any(char.IsDigit))
+            throw new FormatException("Input needs a digit.");
+        
+        // Check if input has the correct chars
         foreach (char letter in input)
         {
             if(Parser.IsIllegalInput(letter))
