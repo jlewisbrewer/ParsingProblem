@@ -13,12 +13,12 @@ public class Parser : IParser
     {
         string result;
         var formatParser = new FormatParser();
-        var parenthesesParser = new ParentheseParser();
+        var subexpressionParser = new SubexpressionParser();
         var productParser = new ProductParser();
         var summationParser = new SummationParser();
 
         result = formatParser.Parse(input);
-        result = parenthesesParser.Parse(result);
+        result = subexpressionParser.Parse(result);
         result = productParser.Parse(result);
         result = summationParser.Parse(result);
 
@@ -130,8 +130,6 @@ public class SummationParser : NumericalParser, IParser
         if(!HasOperators(input, summationOperators))
             return input;
 
-        // By this point we just have to go left to right, starting from
-        // the beginning of the string
         return AdjustInput(input, summationOperators);
     }
 }
@@ -147,7 +145,7 @@ public class ProductParser : NumericalParser, IParser
     }
 }
 
-public class ParentheseParser : NumericalParser, IParser
+public class SubexpressionParser : NumericalParser, IParser
 {
     // This class will be different, it will have to recursively call
     // Parser with it's results
@@ -179,7 +177,6 @@ public class ParentheseParser : NumericalParser, IParser
                 rightParenCount++;
                 if(leftParenCount == rightParenCount)
                 {
-                    // Here we are done
                     substringInfo[1] = i + 1;
                     break;
                 }
@@ -203,9 +200,8 @@ public class ParentheseParser : NumericalParser, IParser
             substring = substring.Remove(0, 1);
             substring = substring.Remove(substring.Length - 1, 1);
             // Now we have to Parse that substring
-
             substring = parser.Parse(substring);
-            // We need to remove two more because of the parenthese we removed
+
             input = input.Remove(startIndex, substringLength).Insert(startIndex, substring);
         }
         return input;
