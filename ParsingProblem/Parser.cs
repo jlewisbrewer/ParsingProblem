@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-
+using ParsingProblem;
 
 interface IParser
 {
@@ -70,16 +70,17 @@ public class NumericalParser
         for(int i = 0; i < input.Length; i++)
         {   
             char ch = input[i];
-            System.Console.WriteLine("Char:  " + ch);
-            System.Console.WriteLine("Index " + i);
+            
+            if(i == input.Length - 1)
+            {
+                indexes[1] = input.Length;
+            }
             if(foundOper && foundRight)
             {
-                indexes[1] = count;
                 break;
             }
             if(char.IsDigit(ch) && !foundLeft)
             {
-                System.Console.WriteLine("Print: " + i);
                 count = 0;
                 foundLeft = true;
                 indexes[0] = i;
@@ -88,10 +89,10 @@ public class NumericalParser
                 foundOper = true;
             if(char.IsDigit(ch) && !foundRight && foundOper)
                 right += ch;
-            if(char.IsWhiteSpace(ch) && !foundRight && !string.IsNullOrEmpty(right))
+            if((char.IsWhiteSpace(ch) || operators.Contains(ch)) && !foundRight && !string.IsNullOrEmpty(right))
             {
-                System.Console.WriteLine("We are here:");
                 foundRight = true;
+                indexes[1] = count;
             }
             count++;
         }
@@ -116,15 +117,24 @@ public class SummationParser : NumericalParser, IParser
 
     public string Parse(string input)
     {
-        string result;
         if(!HasOperators(input))
             return input;
 
         // By this point we just have to go left to right
-        var indexes = FindBinaryOperation(input, operators);
-        System.Console.WriteLine("Indexes: " + indexes[0] + ", " + indexes[1]);
-        var substring = input.Substring(indexes[0], indexes[1]);
-        System.Console.WriteLine("Substring: " + substring);
+        while(HasOperators(input))
+        {
+            var indexes = FindBinaryOperation(input, operators);
+            System.Console.WriteLine("Indexes: " + indexes[0] + ", " + indexes[1]);
+            var substring = input.Substring(indexes[0], indexes[1] - indexes[0]);
+            System.Console.WriteLine("Substring: " + substring);
+            // Change input
+            input = input.Remove(indexes[0], indexes[1]);
+            // Now we evaluate the substring
+            substring = Evaluator.Evaluate(substring);
+            // Bring them back together
+            input = substring + input;
+            System.Console.WriteLine("Input: " + input);
+        }
         return input;
     }
 }
