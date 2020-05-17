@@ -4,8 +4,6 @@ using ParsingProblem;
 
 interface IParser
 {
-    private static char[] operators;
-
     public string Parse(string input);
 }
 
@@ -15,9 +13,11 @@ public class Parser : IParser
     {
         string result;
         var formatParser = new FormatParser();
+        var productParser = new ProductParser();
         var summationParser = new SummationParser();
 
         result = formatParser.Parse(input);
+        result = productParser.Parse(result);
         result = summationParser.Parse(result);
 
         return result;
@@ -51,61 +51,18 @@ public class FormatParser : IParser
                 "parentheses, and arithmetic operators");
             }
         }
-
-        return input;
+        // Removes whitespace
+        return input.Replace(" ", "");
     }
 }
 
 public class NumericalParser
 {
-    public int[] FindBinaryOperation(string input, char[] operators)
-    {
-        string right = "";
-        bool foundLeft = false;
-        bool foundOper = false;
-        bool foundRight = false;
-        int[] indexes = {0, 0};
-        int count = 0;
+    public char[] parentheses = {'(', ')'};
+    public char[] summationOperators = {'+', '-'};
+    public char[] productOperators = {'*', '/'};
 
-        for(int i = 0; i < input.Length; i++)
-        {   
-            char ch = input[i];
-            
-            if(i == input.Length - 1)
-            {
-                indexes[1] = input.Length;
-            }
-            if(foundOper && foundRight)
-            {
-                break;
-            }
-            if(char.IsDigit(ch) && !foundLeft)
-            {
-                count = 0;
-                foundLeft = true;
-                indexes[0] = i;
-            }
-            if(operators.Contains(ch))
-                foundOper = true;
-            if(char.IsDigit(ch) && !foundRight && foundOper)
-                right += ch;
-            if((char.IsWhiteSpace(ch) || operators.Contains(ch)) && !foundRight && !string.IsNullOrEmpty(right))
-            {
-                foundRight = true;
-                indexes[1] = count;
-            }
-            count++;
-        }
-
-        return indexes;
-    }
-}
-
-public class SummationParser : NumericalParser, IParser
-{
-    private static char[] operators = {'+', '-'};
-
-    public static bool HasOperators(string input)
+    public static bool HasOperators(string input, char[] operators)
     {
         foreach(char ch in input)
         {
@@ -114,27 +71,93 @@ public class SummationParser : NumericalParser, IParser
         }
         return false;
     }
-
-    public string Parse(string input)
+    public int[] FindBinaryOperation(string input, char[] operators)
     {
-        if(!HasOperators(input))
-            return input;
+        // We need to find the first operation we want, and then
+        // iter back to find the beginning of the digit
+        bool hasOper = false;
+        int[] substringInfo = {0, input.Length};
 
-        // By this point we just have to go left to right
-        while(HasOperators(input))
+        for(int i = 0; i < input.Length; i++)
         {
-            var indexes = FindBinaryOperation(input, operators);
-            System.Console.WriteLine("Indexes: " + indexes[0] + ", " + indexes[1]);
-            var substring = input.Substring(indexes[0], indexes[1] - indexes[0]);
+            var ch = input[i];
+            if(hasOper && !char.IsDigit(ch))
+            {
+                substringInfo[1] = i;
+                break;
+            }
+            if(operators.Contains(ch))
+            {
+                hasOper = true;
+                for(int j = i - 1; j >= 0; j--)
+                {
+                    if(!char.IsDigit(input[j]))
+                    {
+                        substringInfo[0] = j + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return substringInfo;
+    }
+
+    public string AdjustInput(string input, char[] operators)
+    {
+        while(HasOperators(input, operators))
+        {
+            var substringInfo = FindBinaryOperation(input, operators);
+            var startIndex = substringInfo[0];
+            var substringLength = substringInfo[1] - startIndex;
+            var substring = input.Substring(startIndex, substringLength);
             System.Console.WriteLine("Substring: " + substring);
-            // Change input
-            input = input.Remove(indexes[0], indexes[1]);
             // Now we evaluate the substring
             substring = Evaluator.Evaluate(substring);
             // Bring them back together
-            input = substring + input;
+            input = input.Remove(startIndex, substringLength).Insert(startIndex, substring);
+            // input = substring + input;
             System.Console.WriteLine("Input: " + input);
         }
+        return input;
+    }
+
+}
+
+public class SummationParser : NumericalParser, IParser
+{
+    public string Parse(string input)
+    {
+        if(!HasOperators(input, summationOperators))
+            return input;
+
+        // By this point we just have to go left to right, starting from
+        // the beginning of the string
+        return AdjustInput(input, summationOperators);
+    }
+}
+
+public class ProductParser : NumericalParser, IParser
+{
+    public string Parse(string input)
+    {
+        if(!HasOperators(input, productOperators))
+            return input;
+        
+        return AdjustInput(input, productOperators);
+    }
+}
+
+public class ParentheseParser : NumericalParser, IParser
+{
+    // This class will be different, it will have to recursively call
+    // Parser with it's results
+
+    public string Parse(string input)
+    {
+        if(!HasOperators(input, parentheses))
+            return input;
+        
         return input;
     }
 }

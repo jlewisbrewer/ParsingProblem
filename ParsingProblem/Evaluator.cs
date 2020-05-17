@@ -17,6 +17,7 @@ namespace ParsingProblem
                     return left * right;
                 case '/':
                     return left / right;
+                    
                 default:
                     throw new InvalidOperationException("Unable to use that operator.");
             }

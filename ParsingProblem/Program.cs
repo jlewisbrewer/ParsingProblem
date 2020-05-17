@@ -1,12 +1,21 @@
-﻿namespace ParsingProblem
+﻿using System.Linq;
+
+namespace ParsingProblem
 {
     class Program
     {
+        public string FindSubExpression(string input)
+        {
+            
+        }
         static void Main(string[] args)
         {
-            var input = "12+4+6+3";
-            var parser = new Parser();
-            System.Console.WriteLine(parser.Parse(input));
+            var input = "(12/4)*(6-3)";
+
+
+
+            // var parser = new Parser();
+            // System.Console.WriteLine(parser.Parse(input));
         }
     }
 }
