@@ -5,8 +5,9 @@ namespace ParsingProblem
     {
         static void Main(string[] args)
         {
-            var input = "a";
-            System.Console.WriteLine(Parser.Parse(input));
+            var input = "12 + 4 + 89";
+            var parser = new Parser();
+            System.Console.WriteLine(parser.Parse(input));
         }
     }
 }
