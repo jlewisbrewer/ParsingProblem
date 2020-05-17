@@ -1,21 +1,29 @@
 using System;
 using System.Linq;
 using ParsingProblem;
-
+/*
+    Parser interface
+    All parser classes will have a parse method
+*/
 interface IParser
 {
     public string Parse(string input);
 }
 
+/*
+    Main Parser class
+    Will call all the other parser classes
+*/
 public class Parser : IParser
 {
+    // Returns evaluated expression as a string
     public string Parse(string input)
     {
         string result;
-        var formatParser = new FormatParser();
-        var subexpressionParser = new SubexpressionParser();
-        var productParser = new ProductParser();
-        var summationParser = new SummationParser();
+        FormatParser formatParser = new FormatParser();
+        SubexpressionParser subexpressionParser = new SubexpressionParser();
+        ProductParser productParser = new ProductParser();
+        SummationParser summationParser = new SummationParser();
 
         result = formatParser.Parse(input);
         result = subexpressionParser.Parse(result);
@@ -26,18 +34,28 @@ public class Parser : IParser
     }
 }
 
+/*
+    Format Parser class
+    Ensures that the input has the proper format
+*/
 public class FormatParser : IParser
 {
     private static char[] operators = {'+', '-', '*', '/', '(', ')'};
 
-    private static bool IsIllegalInput(char letter)
+    // Checks if input contains illegal input
+    private static bool IsIllegalInput(string input)
     {
-        // The char can only contain numbers,white space, and approved operators
-        if(char.IsDigit(letter) || char.IsWhiteSpace(letter) 
-            || operators.Contains(letter))
-            return false;
+        foreach (char letter in input)
+        {
+            // The char can only contain numbers,white space, and approved operators
+            if(char.IsDigit(letter) || char.IsWhiteSpace(letter) 
+                || operators.Contains(letter))
+                return false;
+        }
         return true;
     }
+
+    // Returns formated input string
     public string Parse(string input)
     {
         // Make sure the string isn't empty
@@ -45,14 +63,13 @@ public class FormatParser : IParser
             throw new FormatException("Input needs a digit.");
         
         // Check if input has the correct chars
-        foreach (char letter in input)
+ 
+        if(IsIllegalInput(input))
         {
-            if(FormatParser.IsIllegalInput(letter))
-            {
-                throw new FormatException("Input string can only contain digits, " +
-                "parentheses, and arithmetic operators");
-            }
+            throw new FormatException("Input string can only contain digits, " +
+            "parentheses, and arithmetic operators");
         }
+    
         // Removes whitespace
         return input.Replace(" ", "");
     }
@@ -82,7 +99,7 @@ public class NumericalParser
 
         for(int i = 0; i < input.Length; i++)
         {
-            var ch = input[i];
+            char ch = input[i];
             if(hasOper && !char.IsDigit(ch))
             {
                 substringInfo[1] = i;
@@ -109,10 +126,10 @@ public class NumericalParser
     {
         while(HasOperators(input, operators))
         {
-            var substringInfo = FindBinaryOperation(input, operators);
-            var startIndex = substringInfo[0];
-            var substringLength = substringInfo[1] - startIndex;
-            var substring = input.Substring(startIndex, substringLength);
+            int[] substringInfo = FindBinaryOperation(input, operators);
+            int startIndex = substringInfo[0];
+            int substringLength = substringInfo[1] - startIndex;
+            string substring = input.Substring(startIndex, substringLength);
             // Now we evaluate the substring
             substring = Evaluator.Evaluate(substring);
             // Bring them back together
@@ -162,7 +179,7 @@ public class SubexpressionParser : NumericalParser, IParser
         
         for(int i = 0; i < input.Length; i++)
         {
-            var ch = input[i];
+            char ch = input[i];
             if(ch == '(')
             {
                 if (!foundStartIndex)
@@ -184,18 +201,16 @@ public class SubexpressionParser : NumericalParser, IParser
         }
         return substringInfo;
     }
-    public string Parse(string input)
+    
+    public new string AdjustInput(string input, char[] operators)
     {
-        if(!HasOperators(input, parentheses))
-            return input;
-        
-        while(HasOperators(input, parentheses))
+        while(HasOperators(input, operators))
         {
-            var parser = new Parser();
-            var substringInfo = FindSubExpression(input);
-            var startIndex = substringInfo[0];
-            var substringLength = substringInfo[1] - startIndex;
-            var substring = input.Substring(startIndex, substringLength);
+            Parser parser = new Parser();
+            int[] substringInfo = FindSubExpression(input);
+            int startIndex = substringInfo[0];
+            int substringLength = substringInfo[1] - startIndex;
+            string substring = input.Substring(startIndex, substringLength);
             // Remove the parentheses
             substring = substring.Remove(0, 1);
             substring = substring.Remove(substring.Length - 1, 1);
@@ -205,5 +220,12 @@ public class SubexpressionParser : NumericalParser, IParser
             input = input.Remove(startIndex, substringLength).Insert(startIndex, substring);
         }
         return input;
+    }
+    public string Parse(string input)
+    {
+        if(!HasOperators(input, parentheses))
+            return input;
+        
+        return AdjustInput(input, parentheses);
     }
 }

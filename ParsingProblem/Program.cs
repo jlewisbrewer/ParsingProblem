@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace ParsingProblem
+﻿namespace ParsingProblem
 {
     class Program
     {
