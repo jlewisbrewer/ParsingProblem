@@ -54,26 +54,30 @@ public class NumericalParser
             return true;
         return false;
     }
+    public int FindLeftOperandIndex(string input, int index)
+    {
+        for(int i = index - 1; i >= 0; i--)
+        {
+            if(!char.IsDigit(input[i]))
+                return i + 1;
+        }
+        return 0;
+    }
+
+    public int FindRightOperandIndex(string input, int index)
+    {
+        for(int i = index + 1; i < input.Length; i++)
+        {
+            if(!char.IsDigit(input[i]))
+                return i;
+        }
+        return input.Length;
+    }
     public int[] FindOperation(string input, char[] operators)
     {
-        int[] substringInfo = {0, input.Length};
         int operIndex = input.IndexOfAny(operators);
-        for(int i = operIndex - 1; i >= 0; i--)
-        {
-            if(!char.IsDigit(input[i]))
-            {
-                substringInfo[0] = i + 1;
-                break;
-            }
-        }
-        for(int i = operIndex + 1; i < input.Length; i++)
-        {
-            if(!char.IsDigit(input[i]))
-            {
-                substringInfo[1] = i;
-                break;
-            }
-        }
+        int[] substringInfo = {FindLeftOperandIndex(input, operIndex),
+            FindRightOperandIndex(input, operIndex)};
 
         return substringInfo;
     }
@@ -144,7 +148,7 @@ public class ExpressionParser : NumericalParser, IParser
                 if(leftParenCount == rightParenCount)
                 {
                     substringInfo[1] = i + 1;
-                    break;
+                    return substringInfo;
                 }
             }
         }
