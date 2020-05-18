@@ -1,4 +1,6 @@
-﻿namespace ParsingProblem
+﻿using System;
+
+namespace ParsingProblem
 {
     class Program
     {
@@ -6,7 +8,15 @@
         {
             string input = args[0];
             Parser parser = new Parser();
-            System.Console.WriteLine(parser.Parse(input));
+            
+            try 
+            {
+                System.Console.WriteLine(parser.Parse(input));
+            }
+            catch(FormatException e)
+            {
+                System.Console.WriteLine(e.Message);
+            }
         }
     }
 }

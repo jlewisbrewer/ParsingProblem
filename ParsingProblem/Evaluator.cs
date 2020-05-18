@@ -2,10 +2,20 @@ using System;
 
 namespace ParsingProblem
 {
+    /// <summary>
+    /// Evaluates arithmetic operations
+    /// </summary>
     public class Evaluator
     {   
         private static char[] operators = {'+', '-', '*', '/'};
 
+        /// <summary>
+        /// Solves a given expression. Throws exception if operator is illegal.
+        /// </summary>
+        /// <param name="left">Left operand</param>
+        /// <param name="oper">Operator</param>
+        /// <param name="right">Right operand</param>
+        /// <returns>Solution to expression</returns>
         private static int EvaluateExpression(int left, char oper, int right)
         {
             switch(oper)
@@ -18,16 +28,19 @@ namespace ParsingProblem
                     return left * right;
                 case '/':
                     return left / right;
-
                 default:
                     throw new InvalidOperationException("Unable to use that operator.");
             }
         }
 
+
+        /// <summary>
+        /// Evaluates given input
+        /// </summary>
+        /// <param name="input">Input string</param>
+        /// <returns>Solution to expression as a string</returns>
         public static string Evaluate(string input)
         {
-            // Because of the parser, this should just be in the form
-            // LEFT OP RIGHT
             int operIndex = input.IndexOfAny(operators);
             char oper = input[operIndex];
             int left = Int32.Parse(input.Substring(0, operIndex));
