@@ -10,7 +10,7 @@ namespace ParsingProblem
         private static char[] operators = {'+', '-', '*', '/'};
 
         /// <summary>
-        /// Solves a given expression. Throws exception if operator is illegal.
+        /// Solves a given expression.
         /// </summary>
         /// <param name="left">Left operand</param>
         /// <param name="oper">Operator</param>
@@ -32,7 +32,6 @@ namespace ParsingProblem
                     throw new InvalidOperationException("Unable to use that operator.");
             }
         }
-
 
         /// <summary>
         /// Evaluates given input

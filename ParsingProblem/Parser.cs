@@ -30,10 +30,8 @@ namespace ParsingProblem
                 throw new FormatException("Input needs a digit.");
             
             if(input.Any(char.IsLetter))
-            {
                 throw new FormatException("Input string can only contain digits, " +
                 "parentheses, and arithmetic operators");
-            }
         
             return input.Replace(" ", "");
         }
